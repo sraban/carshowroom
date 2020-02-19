@@ -1,0 +1,53 @@
+<ion-header>
+    <ion-navbar>
+        <button ion-button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title>Manufacturers</ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+
+    <form [formGroup]="saveForm" (ngSubmit)="saveFormSubmit()">
+        <ion-item>
+            <ion-label floating>Name *</ion-label>
+            <ion-input formControlName="name" type="text" required></ion-input>
+        </ion-item>
+        <ion-item>
+            <button ion-button tertiary [disabled]="!saveForm.valid">Submit</button>
+        </ion-item>
+    </form>
+
+    <ion-grid *ngIf="contentArray?.length > 0">
+        <ion-list>
+            <ion-row class="nameClass" justify-content-center align-items-center>
+                <ion-col>                    
+                    <strong>No.</strong>                    
+                </ion-col>
+                <ion-col>                    
+                    <strong>Name</strong>                   
+                </ion-col>
+                <ion-col>                    
+                    <div text-center><strong>Action</strong></div>              
+                </ion-col>
+            </ion-row>
+        </ion-list>
+        <ion-list *ngFor="let row of contentArray; let i = index">
+            <ion-row justify-content-center align-items-center>
+                <ion-col>
+                    {{ i+1 }}
+                </ion-col>
+                <ion-col>
+                    {{ row.name }}
+                </ion-col>
+                <ion-col>
+                  <div text-center>
+                    <ion-icon name="remove-circle" (click)="deleteRecord(row.id, $event)"></ion-icon>
+                  </div>
+                </ion-col>
+            </ion-row>
+        </ion-list>
+    </ion-grid>
+
+</ion-content>
