@@ -18,38 +18,26 @@ class VehiclesController extends Controller
      */
     public function index()
     {
-        $vehicles = Vehicles::orderBy('id','DESC')->get();
+        $vehicles = Vehicles::join('manufacturers','manufacturers.id','=','vehicles.manufacture_id')
+                    ->select('manufacturers.name as manufacture','vehicles.*')
+                    ->get();
+        
         foreach($vehicles as $vehicle) {
+            $vehicle->paths = '';
             $img = Images::where('vehicle_id', $vehicle->id);
-            if( $img->count() ) $vehicle->paths = $img->select('path')->get(); else $vehicle->paths = '';
-            $vehicle->manufacture = Manufacturers::find($vehicle->manufacture_id)->name;
+            if($img->count()) $vehicle->paths = $img->select('path')->get();
         }
+
         return response()->json(['status' => true, "description"=>"List of Records", "response" => $vehicles ], 200);
     }
 
-
     public function reports()
     {
-        $vehicles = Vehicles::select('id', 'name', 'manufacture_id')->orderBy('id','DESC')->get();
-        $data = [];
-        foreach($vehicles as $vehicle) {
-            $key = $vehicle->manufacture_id.$vehicle->name;
-            if( isset($count[$vehicle->manufacture_id.$vehicle->name]) ) 
-                $count[$key]++; 
-            else 
-                $count[$key] = 1;
-
-            $vehicle->manufacture = Manufacturers::find($vehicle->manufacture_id)->name;
-            $vehicle->count = $count[$key];
-
-            $data[$key] = array(
-                    "manufacture_id" => $vehicle->manufacture_id,
-                    "manufacture" => $vehicle->manufacture,
-                    "model" => $vehicle->name,
-                    "count" => $vehicle->count
-                );
-        }
-        return response()->json(['status' => true, "description"=>"List of Records", "response" => array_values($data) ], 200);
+        $vehicles = Vehicles::join('manufacturers', 'manufacturers.id','=','vehicles.manufacture_id')
+                    ->select('manufacturers.name as manufacture','vehicles.manufacture_id','vehicles.name as model', DB::raw('count(*) as count'))
+                    ->groupBy('vehicles.manufacture_id','vehicles.name')
+                    ->get();
+        return response()->json(['status' => true, "description"=>"List of Records", "response" => $vehicles ], 200);
     }
 
     /**
